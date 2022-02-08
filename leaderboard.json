@@ -1,0 +1,12 @@
+{
+    "62": {
+        "name": "ok",
+        "position": {
+            "x": 211.08,
+            "y": 66,
+            "z": 360.98,
+            "level": "world"
+        },
+        "text": "Hello\\nWorld"
+    }
+}

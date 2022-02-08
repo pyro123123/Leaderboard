@@ -1,0 +1,16 @@
+---
+name: How2Do
+version: 1.0.1
+main: CodeGhost\How2Do\Main
+api: 4.0.0
+
+commands:
+ lb:
+  description: Create leaderboard
+  permission: lb.command.run
+
+permissions:
+  lb.command.run:
+    description: "Allows the user to run the example command"
+    default: op
+...
