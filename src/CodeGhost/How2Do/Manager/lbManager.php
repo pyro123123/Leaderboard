@@ -18,7 +18,7 @@ use CodeGhost\How2Do\Main;
  * 
  * Class for normal leaderboard manager
  * Method:
- * - update
+ * - edit
  * - create
  * - remove
  * - load
@@ -44,6 +44,10 @@ class lbManager {
     }
     
     $customLB = new customLB($ids,$this->position,$this->text);
+    
+    if(Main::getCfg()->real($ids)) {
+      $customLB->remove();
+    }
     
     $customLB->create();
       
@@ -83,6 +87,7 @@ class lbManager {
     
     foreach (Main::getCfg()->allData() as $k => $v) {
      if(!$k) continue;
+     if(isset($v["type"])) continue;
       $level = Server::getInstance()->getWorldManager()->getWorldByName($v["position"]["level"]);
       
       $pos = new Position($v["position"]["x"],$v["position"]["y"],$v["position"]["z"],$level);
@@ -97,7 +102,9 @@ class lbManager {
     }
   }
   
-    public function get($all) {
+  // Get one (specific) leaderboard or all leaderboard 
+  
+  public function get($all) {
       
      if($all) {
        
@@ -105,7 +112,12 @@ class lbManager {
         
         foreach (Main::getCfg()->allData() as $k => $v) {
          
-        if(isset($v["type"]) && $v["type"] === "money") continue;
+        if(isset($v["type"]) && $v["type"] === "money") {
+          
+          array_push($result,"§bID: ".$v["name"]."\nType: ".$v["text"]);
+          
+          continue;
+        }
           
           array_push($result,"§bID: ".$v["name"]."\nText: ".$v["text"]);
         }
@@ -136,7 +148,33 @@ class lbManager {
       return $text;
      
     }
+   
+   
+  public function edit() {
+    
+    $status = "";
+    $ids = self::toId($this->id);
+   
+   if(!Main::getCfg()->real($ids)) {
+     $status = "§4No leaderboard found with id ($this->id)";
+     return $status;
+   }
+   
+   $getLB = (Main::getCfg()->getData($ids))["position"];
+   
+   $level = Server::getInstance()->getWorldManager()->getWorldByName($getLB["level"]);
+      
+   $pos = new Position($getLB["x"],$getLB["y"],$getLB["z"],$level);
   
+   $this->position = $pos;
+   
+   $this->create();
+   
+   $status = "§aLeaderboard Text have been updated";
+   
+   return $status;
+   }
+   
   // Change string to unique ID
   
   public static function toId($id) {

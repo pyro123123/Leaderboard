@@ -18,6 +18,7 @@ use pocketmine\ {
 use CodeGhost\How2Do\{
   Manager\lbManager,
   task\moneyTask,
+  task\lbTask,
   Manager\configManager,
   Manager\moneyLB
 };
@@ -40,7 +41,14 @@ class Main extends PluginBase implements Listener {
     self::$money = new Config($this->getServer()->getPluginPath()."How2Do/money.json");
     
     // Update money leaderboard
-    $this->getScheduler()->scheduleRepeatingTask(new moneyTask(),20);
+    // 20 = 1 tick
+   
+    $this->getScheduler()->scheduleRepeatingTask(new moneyTask(),80);
+    
+    // Update Normal leaderboard
+    // 20 = 1 tick
+    
+    $this->getScheduler()->scheduleRepeatingTask(new lbTask(),80);
   }
   
   // Return configManager class
@@ -72,7 +80,7 @@ class Main extends PluginBase implements Listener {
         //remove the Command action type
         array_shift($args);
         
-        switch ($commandAction) {
+        switch ($CommandAction) {
           
           case 'create':
            
@@ -123,36 +131,35 @@ class Main extends PluginBase implements Listener {
       
       // Leaderboard Command 
       
-      if($label === "lb") {
+     if($label === "lb") {
        if(!isset($args[0])) {
          $sender->sendMessage("§4/lb <create,edit,get,load,remove,list,money>");
          return true;
        }
        
-       $choose = $args[0];
+       $commandAction = $args[0];
     
-      // remove the Command action type
-
        array_shift($args);  
       
        $manager = new lbManager();
        
-        switch ($choose) {
-          case 'load':
-          $manager->load();
-          $sender->sendMessage("§aLoaded all leaderboard");
-          return true;
-            break;
+       switch ($commandAction) {
           
-          case "create": 
+         case 'load':
+           $manager->load();
+           $sender->sendMessage("§aLoaded all leaderboard");
+         break;
           
-         if((!isset($args[0])) || !isset($args[1])) {
+         case "create": 
+          
+          if((!isset($args[0])) || !isset($args[1])) {
             $sender->sendMessage("§4/lb create <id> <text>");
             return true;
            }
+           
            $id = $args[0];
           
-           array_shift($args); // <text>
+           array_shift($args);
            
            $text = join(" ",$args);
            
@@ -161,116 +168,81 @@ class Main extends PluginBase implements Listener {
           $manager->create();
 
           $sender->sendMessage("§aLeaderboard have been created");
-          return true;
+         
             break;
           
           case "get":
             
-            if(!isset($args[0])) {
+           if(!isset($args[0])) {
               $sender->sendMessage("§4/lb get <id>");
               return true;
             }
             
-            $manager = $manager->restart($args[0]);
+            $id = $args[0];
+            
+        $manager = $manager->restart($id);
+        
          $result = $manager->get(false);
          $sender->sendMessage($result);
          
             break;
           
           case "list": 
-            $sender->sendMessage($manager->get(true));
+           $sender->sendMessage($manager->get(true));
             break;
             
             case "remove":
               
-              if(!isset($args[0])) {
-               $sender->sendMessage("§4/lb remove <id>");
+            if(!isset($args[0])) {
+             $sender->sendMessage("§4/lb remove <id>");
               return true;
-              }
+            }
               
-              $manager = $manager->restart($args[0]);
+           $manager = $manager->restart($args[0]);
               
-              $manager->remove($sender);
+            $manager->remove($sender);
               
-              $sender->sendMessage("§aRemoved leaderboard");
-              break;
+            $sender->sendMessage("§aRemoved leaderboard");
+            break;
             
-            case "money":
-              if(!isset($args[0])) {
-               $sender->sendMessage("§4/lb money <id>");
+           case "money":
+            if(!isset($args[0])) {
+              $sender->sendMessage("§4/lb money <id>");
               return true;
               }
-        
+         $id = $args[0];
          $eco = self::getMoney()->getAll();
    
-         $moneyManager = new moneyLB($args[0],$sender->getLocation()->asPosition(),$eco);
+         $moneyManager = new moneyLB($id,$sender->getLocation()->asPosition(),$eco);
               
               $moneyManager->createMoney();
               
               break;
               
+            case "edit":
+           
+            if((!isset($args[0])) || !isset($args[1])) {
+             $sender->sendMessage("§4/lb edit <id> <new text>");
+            return true;
+            }
+            $id = $args[0];
+            
+            array_shift($args);
+            
+            $newText = implode(" ",$args);
+   
+            $manager = $manager->restart($id,null,implode(" ",$args));
+            
+           $edit = $manager->edit();
+            
+          $sender->sendMessage($edit);
+              break;
               
         }
         
       }
       return true;
     }
-
-
-        
-
-      /*  
-        if($args[0] == "money") {
-          $text = "=============.\n";
-          $allMoney = EconomyAPI::getInstance()->getAllMoney();
-          $count = 1;
-          foreach ($allMoney as $player => $money) {
-            
-            $text .= "$count) $player > $money.\n";
-            $count++;
-          }
-          $text .= "=============";
-          $manager = new lbManager($args[1],$sender->asPosition(),$text);
-          $manager->createLB();
-        }
-        
-        if ($args[0] == "remove") {
-          array_shift($args);
-          $manager = new lbManager($args[0]);
-          $manager->removeLB($sender);
-          return true;
-
-        }
-
-        if ($args[0] == "get") {
-          array_shift($args); // or array_slice if u want
-          $manager = new lbManager($args[0]);
-          $lbInfo = $manager->getLB($sender);
-
-          $sender->sendMessage($lbInfo);
-
-          return true;
-        }
-
-        if (!isset($args[2])) {
-          $sender->sendMessage("§4Please provide the leaderboard text");
-          return true;
-        }
-
-        switch ($args[0]) {
-          case 'create':
-            $slice = array_slice($args,2);
-            
-            break;
-            case 'edit':
-              $text = array_slice($args,2);
-              $manager = new lbManager($args[1],null,join(" ",$text));
-              $manager->editLB($sender);
-              break;
-
-        }
-      }
-    }*/
     return true;
   }
   

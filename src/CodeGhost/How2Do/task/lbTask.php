@@ -12,7 +12,7 @@
  
  class lbTask extends Task {
    
-   public function onRun(int $tick) {
+   public function onRun():void {
      $manager = new lbManager();
      $manager->load();
    }

@@ -103,7 +103,7 @@ class moneyLB {
      
      if(isset($v["type"]) && $v["type"] == "money") {
        
-       $this->id = $k;
+       $this->id = $v["name"];
        $pos = $v["position"];
        $level = Server::getInstance()->getWorldManager()->getWorldByName($pos["level"]);
       

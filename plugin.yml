@@ -6,11 +6,19 @@ api: 4.0.0
 
 commands:
  lb:
-  description: Create leaderboard
-  permission: lb.command.run
+  description: Leaderboard Command
+  permission: lb.command.cmd
+ 
+ money:
+  description: Money Command
+  permission: lb.money.cmd
 
 permissions:
-  lb.command.run:
-    description: "Allows the user to run the example command"
+  lb.command.cmd:
+    description: "Allows the user to run leaderboard Command"
     default: op
+  
+  lb.money.cmd:
+      description: "Allows the user to run money command"
+      default: op
 ...
